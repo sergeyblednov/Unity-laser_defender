@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour {
 	public float speed = 1f;
 	public float padding = 1f;
 	public float firingRate = 0.2f;
-	public float health = 250f;
+	public float health = 500f;
 
 	private float xmin;
 	private float xmax;
@@ -29,7 +29,8 @@ public class PlayerController : MonoBehaviour {
 			transform.position += Vector3.left * speed * Time.deltaTime;
 		} else if (Input.GetKey (KeyCode.RightArrow)) {
 			transform.position += Vector3.right * speed * Time.deltaTime;
-		} else if (Input.GetKeyDown (KeyCode.Space)) {
+		} 
+		if (Input.GetKeyDown (KeyCode.Space)) {
 			InvokeRepeating ("Fire", 0.000001f, firingRate);
 		} else if (Input.GetKeyUp (KeyCode.Space)) {
 			CancelInvoke("Fire");
