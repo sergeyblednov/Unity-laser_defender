@@ -8,6 +8,7 @@ public class FormationController : MonoBehaviour {
 	public float width = 10f;
 	public float height = 5f;
 	public float speed = 2f;
+	public float spawnDelay = 0.5f;
 
 	private bool movingRight;
 	private float xmin;
@@ -15,7 +16,13 @@ public class FormationController : MonoBehaviour {
 
 	void Start () 
 	{
-		SpawnEnemies ();
+		float distance = transform.position.z - Camera.main.transform.position.z;
+		Vector3 leftmost = Camera.main.ViewportToWorldPoint (new Vector3(0, 0, distance));
+		Vector3 rightmost = Camera.main.ViewportToWorldPoint (new Vector3(1, 0, distance));
+		xmin = leftmost.x;
+		xmax = rightmost.x;
+
+		SpawnUntilFull ();
 	}
 		
 	void OnDrawGizmos ()
@@ -37,22 +44,36 @@ public class FormationController : MonoBehaviour {
 		}
 
 		if (AllMembersDead ()) {
-			SpawnEnemies ();
+			SpawnUntilFull ();
 		}
 	}
 
 	void SpawnEnemies () 
 	{
-		float distance = transform.position.z - Camera.main.transform.position.z;
-		Vector3 leftmost = Camera.main.ViewportToWorldPoint (new Vector3(0, 0, distance));
-		Vector3 rightmost = Camera.main.ViewportToWorldPoint (new Vector3(1, 0, distance));
-		xmin = leftmost.x;
-		xmax = rightmost.x;
-
 		foreach (Transform child in transform) {
 			GameObject enemy = Instantiate (enemyPrefab, child.transform.position, Quaternion.identity);
 			enemy.transform.parent = child;
 		}
+	}
+
+	void SpawnUntilFull () 
+	{
+		Transform nextPosition = NextFreePosition ();
+		if (nextPosition) {
+			GameObject enemy = Instantiate (enemyPrefab, nextPosition.position, Quaternion.identity);
+			enemy.transform.parent = nextPosition;	
+			Invoke ("SpawnUntilFull", spawnDelay);
+		}
+	}
+
+	Transform NextFreePosition()
+	{
+		foreach (Transform position in transform) {
+			if (position.childCount == 0) {
+				return position;
+			}
+		}
+		return null;
 	}
 
 	bool AllMembersDead() 
@@ -64,5 +85,4 @@ public class FormationController : MonoBehaviour {
 		}
 		return true;
 	}
-
 }
