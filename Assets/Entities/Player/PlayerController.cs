@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
 	public float speed = 1f;
 	public float padding = 1f;
 	public float firingRate = 0.2f;
+	public float health = 250f;
 
 	private float xmin;
 	private float xmax;
@@ -33,13 +34,27 @@ public class PlayerController : MonoBehaviour {
 		} else if (Input.GetKeyUp (KeyCode.Space)) {
 			CancelInvoke("Fire");
 		}
-
 		transform.position = new Vector3 (Mathf.Clamp(transform.position.x, xmin, xmax), transform.position.y, transform.position.z);
 	}
 
 	void Fire() 
 	{
-		GameObject beam = Instantiate (projectile, transform.position, Quaternion.identity);
+		Vector3 offset = new Vector3 (0, 1, 0);
+		GameObject beam = Instantiate (projectile, transform.position + offset, Quaternion.identity);
 		beam.GetComponent<Rigidbody2D> ().velocity = new Vector3 (0, projectilSpeed, 0);
 	}
+
+	void OnTriggerEnter2D (Collider2D collider)
+	{
+		Projectile missile = collider.gameObject.GetComponent<Projectile> ();
+		if (missile) {
+			health -= missile.GetDamage();
+			missile.Hit ();
+			if (health <= 0) {
+				Destroy (gameObject);
+			}
+		}
+	}
+
+
 }
